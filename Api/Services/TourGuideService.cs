@@ -8,6 +8,7 @@ using TourGuide.Users;
 using TourGuide.Utilities;
 using TripPricer;
 using TourGuide.DTOs;
+using System.Threading;
 
 
 namespace TourGuide.Services;
@@ -23,10 +24,8 @@ public class TourGuideService : ITourGuideService
     private const string TripPricerApiKey = "test-server-api-key";
     private bool _testMode = true;
     private readonly IGpsUtil _gpsUtilService;
-
-
-
-
+    
+   
 
     public TourGuideService(ILogger<TourGuideService> logger, IGpsUtil gpsUtil, IRewardsService rewardsService, ILoggerFactory loggerFactory, IGpsUtil gpsUtilService)
     {
@@ -98,19 +97,7 @@ public class TourGuideService : ITourGuideService
         return visitedLocation;
     }
 
-    // public List<Attraction> GetNearByAttractions(VisitedLocation visitedLocation)
-    //{
-    //     List<Attraction> nearbyAttractions = new ();
-    //     foreach (var attraction in _gpsUtil.GetAttractions())
-    //    {
-    //         if (_rewardsService.IsWithinAttractionProximity(attraction, visitedLocation.Location))
-    //         {
-    //             nearbyAttractions.Add(attraction);
-    //         }
-    //     }
-
-    //     return nearbyAttractions;
-    // }
+ 
 
     public List<Attraction> GetNearByAttractions(VisitedLocation visitedLocation)
     {

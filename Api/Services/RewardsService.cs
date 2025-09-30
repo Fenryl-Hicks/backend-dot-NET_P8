@@ -1,4 +1,5 @@
-﻿using GpsUtil.Location;
+﻿using System.Collections.Concurrent;
+using GpsUtil.Location;
 using TourGuide.LibrairiesWrappers.Interfaces;
 using TourGuide.Services.Interfaces;
 using TourGuide.Users;
@@ -32,26 +33,39 @@ public class RewardsService : IRewardsService
         _proximityBuffer = _defaultProximityBuffer;
     }
 
+    
+
     public void CalculateRewards(User user)
     {
-        count++;
         List<VisitedLocation> userLocations = user.VisitedLocations.ToList();
         List<Attraction> attractions = _gpsUtil.GetAttractions();
 
         foreach (var visitedLocation in userLocations)
         {
-            foreach (var attraction in attractions)
+            var userRewards = new ConcurrentBag<UserReward>();  // Collection thread-safe
+
+            Parallel.ForEach(attractions, attraction =>     //Chaque thread va traiter une attraction en même temps que d’autres.
             {
+                // Vérifie que user n'a pas déjà reçu une récompense pour cette attraction
                 if (!user.UserRewards.Any(r => r.Attraction.AttractionName == attraction.AttractionName))
                 {
                     if (NearAttraction(visitedLocation, attraction))
                     {
-                        user.AddUserReward(new UserReward(visitedLocation, attraction, GetRewardPoints(attraction, user)));
+                        int points = GetRewardPoints(attraction, user);     //appel lourd, car il simule un appel à un système externe
+                        userRewards.Add(new UserReward(visitedLocation, attraction, points));    //ajoute la récompense calculée dans ConcurrentBag
                     }
                 }
+            });
+
+            // Ajoute les récompenses (en dehors du bloc parallèle, pour éviter les risques de conflits ou de problèmes de synchronisation.)
+            foreach (var reward in userRewards)
+            {
+                user.AddUserReward(reward);
             }
         }
     }
+
+
 
     public bool IsWithinAttractionProximity(Attraction attraction, Locations location)
     {
