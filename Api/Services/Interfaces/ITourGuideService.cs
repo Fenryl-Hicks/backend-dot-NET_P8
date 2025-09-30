@@ -2,6 +2,7 @@
 using TourGuide.Users;
 using TourGuide.Utilities;
 using TripPricer;
+using TourGuide.DTOs;
 
 namespace TourGuide.Services.Interfaces
 {
@@ -17,5 +18,7 @@ namespace TourGuide.Services.Interfaces
         VisitedLocation GetUserLocation(User user);
         List<UserReward> GetUserRewards(User user);
         VisitedLocation TrackUserLocation(User user);
+
+        List<NearbyAttractionDto> GetNearbyAttractionsWithDetails(User user);
     }
 }
