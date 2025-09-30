@@ -1,0 +1,38 @@
+name: .NET 8 CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # Étape 1 – Compilation
+    - name: Compile
+      run: dotnet build --configuration Release
+
+    # Étape 2 – Tests (exclut les tests de performance)
+    - name: Run unit tests (excluding performance tests)
+      run: dotnet test --configuration Release --no-build --filter "TestCategory!=Performance"
+
+    # Étape 3 – Build des artefacts
+    - name: Publish
+      run: dotnet publish -c Release -o out
+
+    - name: Upload artefacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build
+        path: out
